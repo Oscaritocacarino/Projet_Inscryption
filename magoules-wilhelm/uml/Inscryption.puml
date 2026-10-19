@@ -1,0 +1,315 @@
+@startuml Inscryption
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle Bold
+skinparam style strictuml
+hide empty members
+
+
+class Main {
+    + {static} main(args: String[*])
+}
+
+
+package affichage {
+
+    class AffichageAction {
+        + <<create>> AffichageAction()
+        + choixTour(): String
+        + choixAction(): Integer
+        + choixRecompense(recompenses: Card[*]): Integer
+        + choixSacrifice(): Integer
+        + choixJeuMain(): Integer
+        + choixJeuPlateau(): Integer
+        + choixSacrificePierre(cartes: ArrayList<Card>): Integer
+        + choixBufferCarte(pioche: Pioche): Integer
+        + choixJeuPlateau2(): Integer
+    }
+
+    class AffichageJeu {
+        + {static} dejaPioche(): String
+        + {static} piocheVide(): String
+        + {static} cartePiochee(nom: String): String
+        + {static} pierreSacrificeChoix(): String
+        + {static} carteJouee(nom: String): String
+        + {static} emplacementOccupe(nom: String): String
+        + {static} pasAssezOs(nom: String): String
+        + {static} pasAssezSang(): String
+        + {static} carteIntrouvable(i: Integer): String
+        + {static} aucuneCarteSacrifiable(col: Integer): String
+        + {static} carteSacrifiee(nom: String, col: Integer): String
+        + {static} indexInvalide(): String
+        + {static} emplacementDejeuOccupe(): String
+        + {static} debutTourSuivant(): String
+        + {static} choixInvalide(): String
+        + {static} remportePartie(n: Integer): String
+        + {static} perdPartie(n: Integer): String
+        + {static} gagner3Parties(): String
+        + {static} perdJeu(): String
+        + {static} carteAjoutee(nom: String): String
+        + {static} afficher(message: String)
+        + {static} degatsCartes(nom: String, dmg: Integer, nomVic: String)
+        + {static} degatsScore(nom: String, dmg: Integer)
+        + {static} vaincu(nom: String)
+    }
+
+    class AffichageCarte {
+        + {static} lignes(carte: Card, label: String): String[*]
+        - {static} lignesAnimal(carte: Card): String[*]
+        - {static} construirePouvoirs(carte: Card): String[*]
+        - {static} lignesObstacle(carte: Card): String[*]
+        - {static} lignesVide(label: String): String[*]
+        - {static} tronquer(s: String, max: Integer): String
+        - {static} centrer(s: String, largeur: Integer): String
+    }
+
+    class AffichagePlateau {
+        - {static} NB_COL: Integer
+        - {static} SEP: String
+        + {static} afficher(plateau: PlateauDeJeu, score: Integer, numPartie: Integer, numTour: Integer, mainJoueur: Card[*], nbOs: Integer, nbPioche: Integer)
+        - {static} afficherEntete(numPartie: Integer, numTour: Integer, score: Integer)
+        - {static} afficherFuturBoardOrdi(plateau: PlateauDeJeu)
+        - {static} afficherFleches()
+        - {static} afficherBoardOrdi(plateau: PlateauDeJeu)
+        - {static} afficherBoardJoueur(plateau: PlateauDeJeu)
+        - {static} imprimerRangee(prefixeFixe: String, lignes: String[*][*])
+        - {static} afficherMain(cartes: Card[*], nbOs: Integer, nbPioche: Integer)
+        - {static} padDroite(s: String, largeur: Integer): String
+        - {static} capitalise(s: String): String
+    }
+}
+
+
+package jeu {
+
+    enum "Type" as CartesDeJeuType <<enumerate>> {
+        ANIMAL
+        OBSTACLE
+    }
+
+    class CartesDeJeu {
+        - m_nom: String
+        - m_pv: Integer
+        - m_damage: Integer
+        - m_sang: Integer
+        - m_os: Integer
+        - m_volant: Boolean
+        - m_piquant: Boolean
+        - m_venimeux: Boolean
+        - m_coureur: Boolean
+        - m_invincible: Boolean
+        - m_croissance: Boolean
+        - m_puant: Boolean
+        + <<create>> CartesDeJeu(nom: String, damage: Integer, pv: Integer, sang: Integer, os: Integer, volant: Boolean, piquant: Boolean, venimeux: Boolean, coureur: Boolean, invincible: Boolean, croissance: Boolean, puant: Boolean)
+        + <<create>> CartesDeJeu(nom: String, pv: Integer)
+        + getType(): CartesDeJeu.Type
+        + getNom(): String
+        + getPv(): Integer
+        + isAnimal(): Boolean
+        + isObstacle(): Boolean
+        + getDamage(): Integer
+        + getSang(): Integer
+        + getOs(): Integer
+        + getVolant(): Boolean
+        + getPiquant(): Boolean
+        + getVenimeux(): Boolean
+        + getCoureur(): Boolean
+        + getInvincible(): Boolean
+        + getCroissance(): Boolean
+        + getPuant(): Boolean
+        + setPouvoirs(volant: Boolean, piquant: Boolean, venimeux: Boolean, coureur: Boolean, invincible: Boolean, croissance: Boolean, puant: Boolean)
+    }
+
+    CartesDeJeu "1" *--> "1\n - m_type" CartesDeJeuType : belongs to >
+
+    class CartesDeJeuFactory {
+        + <<create>> CartesDeJeuFactory()
+        + createChat(): CartesDeJeu
+        + createCorbeau(): CartesDeJeu
+        + createCoyote(): CartesDeJeu
+        + createEcureuil(): CartesDeJeu
+        + createElan(): CartesDeJeu
+        + createGrizzly(): CartesDeJeu
+        + createHermine(): CartesDeJeu
+        + createLoup(): CartesDeJeu
+        + createLouveteau(): CartesDeJeu
+        + createMoineau(): CartesDeJeu
+        + createPorcepic(): CartesDeJeu
+        + createPunaise(): CartesDeJeu
+        + createVipere(): CartesDeJeu
+        + createRocher(): CartesDeJeu
+        + createSapin(): CartesDeJeu
+    }
+
+    CartesDeJeuFactory .> CartesDeJeu : <<create>>
+
+    class Card {
+        - m_pvActuels: Integer
+        + <<create>> Card(carte: CartesDeJeu)
+        + getType(): CartesDeJeu.Type
+        + isAnimal(): Boolean
+        + isObstacle(): Boolean
+        + getCarte(): CartesDeJeu
+        + getNom(): String
+        + getPvActuels(): Integer
+        + subirDegats(d: Integer)
+        + estMorte(): Boolean
+        + getAttaque(): Integer
+        + getSang(): Integer
+        + getOs(): Integer
+        + getVolant(): Boolean
+        + getPiquant(): Boolean
+        + getVenimeux(): Boolean
+        + getCoureur(): Boolean
+        + getInvincible(): Boolean
+        + getCroissance(): Boolean
+        + getPuant(): Boolean
+        + getAPouvoirs(): Boolean
+        + getListePouvoirs(): Boolean
+        + isSacrifiable(): Boolean
+        + setPouvoirs(volant: Boolean, piquant: Boolean, venimeux: Boolean, coureur: Boolean, invincible: Boolean, croissance: Boolean, puant: Boolean)
+        + attaque(cible: Optional<Card>, affichage: AffichageJeu): Integer
+        + activerPouvoirs(plateau: PlateauDeJeu, i: Integer)
+        + equals(object: Object): Boolean
+    }
+
+    Card "1" *--> "1\n - m_carte" CartesDeJeu : belongs to >
+
+    class MainJoueur {
+        + <<create>> Main(carte1: Card, carte2: Card, carte3: Card, carte4: Card)
+        + getMain(): Card[*]
+        + getCarte(index: Integer): Card
+        + viderMain()
+        + enleverCarte(index: Integer): Boolean
+        + ajouterCarte(carte: Card): Boolean
+        + taille(): Integer
+    }
+
+    MainJoueur "1" *--> "0..*\n - m_main" Card : belongs to >
+
+    class Pioche {
+        + <<create>> Pioche()
+        + remplir()
+        + getPioche(): Card[*]
+        + setPioche(pioche: Card[*])
+        + piocher(): Card
+        + estVide(): Boolean
+        + taille(): Integer
+        + ajouterCarte(carte: Card)
+    }
+
+    Pioche "1" *--> "0..*\n - m_pioche" Card : belongs to >
+    Pioche "1" *--> "0..*\n - m_recompense" CartesDeJeu : belongs to >
+
+    class Joueur {
+        - m_os: Integer
+        - m_aPioche: Boolean
+        + <<create>> Joueur()
+        + getMain(): MainJoueur
+        + getPioche(): Pioche
+        + getPiocheDef(): Pioche
+        + getPiocheDefContenu(i: Integer): Card
+        + getOs(): Integer
+        + initialiserMain()
+        + piocher(): Card
+        + carteEstMorte()
+        + debutDeTour()
+        + depenserOs(nb: Integer)
+        + resetPioche()
+    }
+
+    Joueur "1" *--> "1\n - m_main" MainJoueur : belongs to >
+    Joueur "1" *--> "1\n - m_pioche" Pioche : belongs to >
+    Joueur "1" *--> "1\n - m_piocheProv" Pioche : belongs to >
+
+
+    class PlateauDeJeu {
+        + <<create>> PlateauDeJeu()
+        + <<create>> PlateauDeJeu(obstaclesJoueur: Card[*])
+        + getBoardPlayer(): Card[*]
+        + getBoardOrdi(): Card[*]
+        + getFuturBoardOrdi(): Card[*]
+        + getCardIndex(index: Integer): Card
+        + poserCarteJoueur(c: Card, index: Integer)
+        + retirerCarteJoueur(index: Integer)
+        + getOrdi(index: Integer): Card
+        + poserCarteOrdi(carte: Card, index: Integer)
+        + poserFuturCarteOrdi(carte: Card, index: Integer)
+        + retirerCarteOrdi(index: Integer)
+        + retirerFuturCarteOrdi(index: Integer)
+    }
+
+    PlateauDeJeu "1" *--> "1\n - m_boardPlayer" Card : belongs to >
+    PlateauDeJeu "1" *--> "1\n - m_boardOrdi" Card : belongs to >
+    PlateauDeJeu "1" *--> "1\n - m_futurBoardOrdi" Card : belongs to >
+
+    class TourLogique {
+        - m_compteurTour: Integer
+        - m_score: Integer
+        - m_joueurGagne: Boolean
+        - m_ordiGagne: Boolean
+        + <<create>> TourLogique(joueur: Joueur, adversaire: Joueur, plateau: PlateauDeJeu)
+        + getPlateau(): PlateauDeJeu
+        + getOrdiGagne(): Boolean
+        + getJoueurGagne(): Boolean
+        + getScore(): Integer
+        + getCompteurTour(): Integer
+        + getJoueur(): Joueur
+        + piocherJoueur()
+        + poserCarteJoueur(index: Integer, emplacement: Integer)
+        + setDemanderSacrifice(fn: IntSupplier)
+        - demanderSacrifice(): Integer
+        + sacrifierJoueur(ca: Integer): Boolean
+        - creerPlateauPartie(numPartie: Integer): PlateauDeJeu
+        + finTour(nb_games: Integer)
+        + newTour(nbTour: Integer)
+    }
+
+    TourLogique "1" *--> "1\n - m_joueur" Joueur : belongs to >
+    TourLogique "1" *--> "1\n - m_adversaire" Joueur : belongs to >
+    TourLogique "1" *--> "1\n - m_plateau" PlateauDeJeu : belongs to >
+    TourLogique "1" *--> "1\n - m_affichage" AffichageJeu : belongs to >
+
+
+    class InteractionJoueur {
+        - m_pioche: Boolean
+        - m_numPartie: Integer
+        + <<create>> InteractionJoueur(tourLogique: TourLogique, af: AffichageAction, numPartie: Integer)
+        + jouer(choix: Integer, nb_games: Integer)
+        - afficherEtat()
+    }
+
+    InteractionJoueur "1" *--> "1\n - m_tourLogique" TourLogique : belongs to >
+    InteractionJoueur "1" *--> "1\n - m_affichageAction" AffichageAction : belongs to >
+    InteractionJoueur "1" *--> "1\n - m_joueur" Joueur : belongs to >
+
+    class Run {
+        - m_nbgame: Integer
+        + <<create>> Run(scanner: Scanner)
+        + recompense(): Card[*]
+        + getJoueur(): Joueur
+        + getAdversaire(): Joueur
+        - nouvellePartie()
+        + sacrifices(): Card[*]
+        + playRun()
+    }
+
+    Run "1" *--> "1\n - m_tourlogique"    TourLogique       : belongs to >
+    Run "1" *--> "1\n - m_currentTour"    InteractionJoueur : belongs to >
+    Run "1" *--> "1\n - m_joueur"         Joueur            : belongs to >
+    Run "1" *--> "1\n - m_adversaire"     Joueur            : belongs to >
+    Run "1" *--> "1\n - m_affichageAction" AffichageAction  : belongs to >
+}
+
+Main .> Run : <<use>>
+AffichagePlateau .> PlateauDeJeu : <<use>>
+AffichagePlateau .> AffichageCarte : <<use>>
+AffichageCarte .> Card : <<use>>
+InteractionJoueur .> AffichagePlateau : <<use>>
+InteractionJoueur .> AffichageJeu : <<use>>
+TourLogique .> AffichageJeu : <<use>>
+Joueur .> AffichageJeu : <<use>>
+PlateauDeJeu .> AffichageJeu : <<use>>
+Card .> CartesDeJeuFactory : <<use>>
+
+@enduml
